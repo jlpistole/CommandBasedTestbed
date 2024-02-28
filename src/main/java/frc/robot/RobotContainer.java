@@ -9,7 +9,10 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.InterruptTestSubsystem;
+import frc.robot.subsystems.ShooterSequenceTestSubsystem;
 import frc.robot.subsystems.SingleMotorSubsystem;
+import frc.robot.subsystems.StartEndTestSubsystem;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
@@ -27,13 +30,16 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final SingleMotorSubsystem m_singleMotorSubsystem = new SingleMotorSubsystem();
   private final InterruptTestSubsystem m_interruptTestSubsystem = new InterruptTestSubsystem();
+  private final StartEndTestSubsystem startEndTestSubsystem = new StartEndTestSubsystem(); 
+  private final ShooterSequenceTestSubsystem shooterSequenceTestSubsystem = new ShooterSequenceTestSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
  // private final CommandXboxController m_driverController =
    //   new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-  private final CommandPS4Controller m_driverController =
-      new CommandPS4Controller(OperatorConstants.kDriverControllerPort);
+  //private final CommandPS4Controller m_driverController =
+    //  new CommandPS4Controller(OperatorConstants.kDriverControllerPort);
+    private final GenericGamepad controller = new GenericGamepad(new CommandPS4Controller(OperatorConstants.kDriverControllerPort));
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -51,6 +57,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    /* 
     m_driverController.R2().whileTrue(m_singleMotorSubsystem.spinIn());
     //m_driverController.L2().whileTrue(m_singleMotorSubsystem.spinOut());
     m_driverController.L2().whileTrue(m_singleMotorSubsystem.spinOut());
@@ -59,7 +66,13 @@ public class RobotContainer {
       .until(m_driverController.cross())
       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     m_driverController.square().onTrue(m_interruptTestSubsystem.runShortCommand());
+    */
+    controller.triangle_y.onTrue(startEndTestSubsystem.runTriCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    controller.square_x.onTrue(startEndTestSubsystem.runSquareCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+
+    controller.rightTriggerB.onTrue(shooterSequenceTestSubsystem.runShooterSequence().until(() -> { return !controller.rightTriggerB.getAsBoolean(); }));
   }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
